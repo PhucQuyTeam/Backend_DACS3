@@ -9,5 +9,4 @@ public class Bedacs3Application {
 	public static void main(String[] args) {
 		SpringApplication.run(Bedacs3Application.class, args);
 	}
-
 }
