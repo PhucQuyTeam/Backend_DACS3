@@ -5,12 +5,14 @@ public class AuthResponse {
     private String message;
     private UserDTO user;
     private String token;
+    private String refreshToken;
 
-    public AuthResponse(boolean success, String message, UserDTO user, String token) {
+    public AuthResponse(boolean success, String message, UserDTO user, String token,String refreshToken) {
         this.success = success;
         this.message = message;
         this.user = user;
         this.token = token;
+        this.refreshToken = refreshToken;
     }
 
     // --- BẮT BUỘC PHẢI CÓ GETTER/SETTER ĐỂ XUẤT RA JSON ---
@@ -25,4 +27,11 @@ public class AuthResponse {
 
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
 }
