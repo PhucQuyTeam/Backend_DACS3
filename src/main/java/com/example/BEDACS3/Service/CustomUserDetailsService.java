@@ -1,4 +1,4 @@
-package com.example.BEDACS3.security;
+package com.example.BEDACS3.Service;
 
 import com.example.BEDACS3.Repository.entity.UserEntity;
 import com.example.BEDACS3.Repository.impl.UserRepositoryImpl;

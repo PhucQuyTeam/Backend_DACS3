@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Không lưu Session
                 .authorizeHttpRequests(auth -> auth
                         // CHÚ Ý: Mở cửa cho API Đăng nhập / Đăng ký (Ai cũng vào được)
-                        .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/refresh").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/refresh","/api/home/**", "/api/products/**").permitAll()
                         // Tất cả các API còn lại (ví dụ mua hàng, xem profile) bắt buộc phải có Token JWT
                         .anyRequest().authenticated()
                 );

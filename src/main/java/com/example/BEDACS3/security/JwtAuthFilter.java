@@ -1,5 +1,6 @@
 package com.example.BEDACS3.security;
 
+import com.example.BEDACS3.Service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

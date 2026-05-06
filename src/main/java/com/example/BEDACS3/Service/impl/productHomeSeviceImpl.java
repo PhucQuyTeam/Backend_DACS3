@@ -33,6 +33,7 @@ public class productHomeSeviceImpl implements ProductHomeService {
 
         for (productEntity entity : entities){
             ProductHomeDTO dto = new ProductHomeDTO();
+            dto.setProductId(entity.getId());
             dto.setName(entity.getName());
             dto.setDescription(entity.getDescription());
             dto.setPrice(entity.getPrice());
