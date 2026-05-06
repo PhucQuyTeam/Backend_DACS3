@@ -6,4 +6,5 @@ public interface UserRepository {
     UserEntity findByEmail(String email);
     boolean existsByEmail(String email);
     UserEntity save(UserEntity userEntity);
+    UserEntity getNameReviewById(Integer userId);
 }

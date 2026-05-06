@@ -1,6 +1,7 @@
 package com.example.BEDACS3.Service.model.products;
 
 public class ProductHomeDTO {
+    private int productId;
     private String name;
     private String img;
     private int total_ProductQuantity;
@@ -11,13 +12,22 @@ public class ProductHomeDTO {
     public ProductHomeDTO() {
     }
 
-    public ProductHomeDTO(String name, String img, int total_ProductQuantity, String description, int price, int quantity) {
+    public ProductHomeDTO(int productId, String name, String img, int total_ProductQuantity, String description, int price, int quantity) {
+        this.productId = productId;
         this.name = name;
         this.img = img;
         this.total_ProductQuantity = total_ProductQuantity;
         this.description = description;
         this.price = price;
         this.quantity = quantity;
+    }
+
+    public int getProductId() {
+        return productId;
+    }
+
+    public void setProductId(int productId) {
+        this.productId = productId;
     }
 
     public String getName() {

@@ -3,6 +3,7 @@ package com.example.BEDACS3.Repository.impl;
 import com.example.BEDACS3.Database.DatabaseDA;
 import com.example.BEDACS3.Repository.UserRepository;
 import com.example.BEDACS3.Repository.entity.UserEntity;
+import com.example.BEDACS3.Repository.entity.productEntity;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
@@ -76,5 +77,32 @@ public class UserRepositoryImpl implements UserRepository {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public UserEntity getNameReviewById(Integer userId) {
+        UserEntity user = null;
+        String sql = "SELECT name FROM users WHERE id = ?";
+
+
+        try (Connection conn = DatabaseDA.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+
+
+                if (rs.next()) {
+                    user = new UserEntity();
+                    user.setName(rs.getString("name"));
+
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return user;
     }
 }

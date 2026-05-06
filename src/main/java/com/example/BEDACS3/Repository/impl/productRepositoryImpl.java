@@ -42,4 +42,37 @@ public class productRepositoryImpl implements productRepository {
         }
         return proList;
     }
+
+    @Override
+    public productEntity getProductbyId(Integer productId) {
+        productEntity pro = null;
+        String sql = "SELECT * FROM products WHERE id = ?";
+
+
+        try (Connection conn = DatabaseDA.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, productId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+
+
+                if (rs.next()) {
+                    pro = new productEntity();
+                    pro.setId(rs.getInt("id"));
+                    pro.setName(rs.getString("name"));
+                    pro.setDescription(rs.getString("description"));
+                    pro.setPrice(rs.getInt("price"));
+                    pro.setQuantity(rs.getInt("quantity"));
+                    pro.setCategoryId(rs.getInt("categoryId"));
+                    pro.setCreatedAt(rs.getTimestamp("created_at"));
+                    pro.setUpdatedAt(rs.getTimestamp("updated_at"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return pro;
+    }
 }

@@ -39,4 +39,31 @@ public class productImageRepositoryImpl implements productImageRepository {
         }
         return image;
     }
+
+    @Override
+    public List<ProductImageEntity> findAllImageByProductId(Integer productId) {
+        List<ProductImageEntity> listImage = new ArrayList<>();
+        String sql = "SELECT * FROM product_images WHERE product_id = ?";
+
+        try (Connection conn = DatabaseDA.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ProductImageEntity productImage = new ProductImageEntity();
+                    productImage.setId(rs.getInt("id"));
+                    productImage.setProductId(rs.getInt("product_id"));
+                    productImage.setImagePath(rs.getString("image_path"));
+
+                    listImage.add(productImage);
+                }
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return listImage;
+    }
 }
