@@ -8,8 +8,7 @@ public class PhotoConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Ánh xạ đường dẫn URL bắt đầu bằng /uploads/ tới thư mục vật lý "uploads" ở gốc dự án
-        registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:uploads/");
+        registry.addResourceHandler("/upload/**")
+                .addResourceLocations("file:upload/");
     }
 }

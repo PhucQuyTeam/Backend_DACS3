@@ -1,108 +1,126 @@
-package com.example.BEDACS3.Repository.impl;
+    package com.example.BEDACS3.Repository.impl;
 
-import com.example.BEDACS3.Database.DatabaseDA;
-import com.example.BEDACS3.Repository.UserRepository;
-import com.example.BEDACS3.Repository.entity.UserEntity;
-import com.example.BEDACS3.Repository.entity.productEntity;
-import org.springframework.stereotype.Repository;
+    import com.example.BEDACS3.Database.DatabaseDA;
+    import com.example.BEDACS3.Repository.UserRepository;
+    import com.example.BEDACS3.Repository.entity.UserEntity;
+    import com.example.BEDACS3.Repository.entity.productEntity;
+    import org.springframework.stereotype.Repository;
 
-import java.sql.*;
+    import java.sql.*;
 
-@Repository
-public class UserRepositoryImpl implements UserRepository {
+    @Repository
+    public class UserRepositoryImpl implements UserRepository {
 
-    @Override
-    public UserEntity findByEmail(String email) {
-        String sql = "SELECT * FROM users WHERE email = ?";
-        try (Connection conn = DatabaseDA.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, email);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                UserEntity user = new UserEntity();
-                user.setId(rs.getInt("id"));
-                user.setName(rs.getString("name"));
-                user.setUsername(rs.getString("username"));
-                user.setEmail(rs.getString("email"));
-                user.setPassword(rs.getString("password"));
-                user.setNumberPhone(rs.getString("numberPhone"));
-                user.setAvatar(rs.getString("avatar"));
-                user.setRoleid(rs.getInt("roleid"));
-                return user;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    @Override
-    public boolean existsByEmail(String email) {
-        String sql = "SELECT count(*) FROM users WHERE email = ?";
-        try (Connection conn = DatabaseDA.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, email);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    @Override
-    public UserEntity save(UserEntity user) {
-        String sql = "INSERT INTO users (name, username, email, password, numberPhone, roleid, create_at) VALUES (?, ?, ?, ?, ?, ?, NOW())";
-        try (Connection conn = DatabaseDA.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            ps.setString(1, user.getName());
-            ps.setString(2, user.getUsername());
-            ps.setString(3, user.getEmail());
-            ps.setString(4, user.getPassword());
-            ps.setString(5, user.getNumberPhone());
-            ps.setInt(6, user.getRoleid());
-
-            int affectedRows = ps.executeUpdate();
-            if (affectedRows > 0) {
-                ResultSet rs = ps.getGeneratedKeys();
+        @Override
+        public UserEntity findByEmail(String email) {
+            String sql = "SELECT * FROM users WHERE email = ?";
+            try (Connection conn = DatabaseDA.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, email);
+                ResultSet rs = ps.executeQuery();
                 if (rs.next()) {
-                    user.setId(rs.getInt(1)); // Gắn ID vừa tạo vào entity
+                    UserEntity user = new UserEntity();
+                    user.setId(rs.getInt("id"));
+                    user.setName(rs.getString("name"));
+                    user.setUsername(rs.getString("username"));
+                    user.setEmail(rs.getString("email"));
+                    user.setPassword(rs.getString("password"));
+                    user.setNumberPhone(rs.getString("numberPhone"));
+                    user.setAvatar(rs.getString("avatar"));
+                    user.setRoleid(rs.getInt("roleid"));
                     return user;
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+            return null;
         }
-        return null;
-    }
 
-    @Override
-    public UserEntity getNameReviewById(Integer userId) {
-        UserEntity user = null;
-        String sql = "SELECT name FROM users WHERE id = ?";
-
-
-        try (Connection conn = DatabaseDA.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, userId);
-
-            try (ResultSet rs = ps.executeQuery()) {
-
-
+        @Override
+        public boolean existsByEmail(String email) {
+            String sql = "SELECT count(*) FROM users WHERE email = ?";
+            try (Connection conn = DatabaseDA.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, email);
+                ResultSet rs = ps.executeQuery();
                 if (rs.next()) {
-                    user = new UserEntity();
-                    user.setName(rs.getString("name"));
-
+                    return rs.getInt(1) > 0;
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+            return false;
         }
 
-        return user;
+        @Override
+        public UserEntity save(UserEntity user) {
+            String sql = "INSERT INTO users (name, username, email, password, numberPhone, roleid, create_at) VALUES (?, ?, ?, ?, ?, ?, NOW())";
+            try (Connection conn = DatabaseDA.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+                ps.setString(1, user.getName());
+                ps.setString(2, user.getUsername());
+                ps.setString(3, user.getEmail());
+                ps.setString(4, user.getPassword());
+                ps.setString(5, user.getNumberPhone());
+                ps.setInt(6, user.getRoleid());
+
+                int affectedRows = ps.executeUpdate();
+                if (affectedRows > 0) {
+                    ResultSet rs = ps.getGeneratedKeys();
+                    if (rs.next()) {
+                        user.setId(rs.getInt(1)); // Gắn ID vừa tạo vào entity
+                        return user;
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        public UserEntity getNameReviewById(Integer userId) {
+            UserEntity user = null;
+            String sql = "SELECT name FROM users WHERE id = ?";
+
+
+            try (Connection conn = DatabaseDA.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+
+                ps.setInt(1, userId);
+
+                try (ResultSet rs = ps.executeQuery()) {
+
+
+                    if (rs.next()) {
+                        user = new UserEntity();
+                        user.setName(rs.getString("name"));
+
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            return user;
+        }
+        // Thêm hàm này vào trong UserRepositoryImpl.java
+        public boolean updateUserInfo(String email, String name, String phone, String avatar) {
+            String sql = "UPDATE users SET name = ?, numberPhone = ?, avatar = ? WHERE email = ?";
+            try (Connection conn = DatabaseDA.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+
+                ps.setString(1, name);
+                ps.setString(2, phone);
+                ps.setString(3, avatar);
+                ps.setString(4, email); // Lấy email làm gốc để tìm đúng user
+
+                int affectedRows = ps.executeUpdate();
+                return affectedRows > 0;
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
     }
-}
