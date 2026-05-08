@@ -40,6 +40,7 @@ public class UserController {
         profileData.put("name", user.getName()); // Android cần biến "name"
         profileData.put("email", user.getEmail());
         profileData.put("avatar", user.getAvatar());
+        profileData.put("numberPhone", user.getNumberPhone());
 
         // Bạn có thể query thêm số đơn hàng vào đây:
         profileData.put("pendingCount", 2);
