@@ -7,4 +7,5 @@ public interface UserRepository {
     boolean existsByEmail(String email);
     UserEntity save(UserEntity userEntity);
     UserEntity getNameReviewById(Integer userId);
+    boolean updateCartQuantity(int cartId, int quantity);
 }
