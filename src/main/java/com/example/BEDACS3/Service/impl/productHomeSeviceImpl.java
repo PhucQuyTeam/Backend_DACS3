@@ -1,12 +1,10 @@
 package com.example.BEDACS3.Service.impl;
 
-import com.example.BEDACS3.Repository.OrderDetailRepository;
-import com.example.BEDACS3.Repository.categoryRepository;
+import com.example.BEDACS3.Repository.*;
 import com.example.BEDACS3.Repository.entity.CategoryEntity;
 import com.example.BEDACS3.Repository.entity.ProductImageEntity;
+import com.example.BEDACS3.Repository.entity.ReviewSummary;
 import com.example.BEDACS3.Repository.entity.productEntity;
-import com.example.BEDACS3.Repository.productImageRepository;
-import com.example.BEDACS3.Repository.productRepository;
 import com.example.BEDACS3.Service.ProductHomeService;
 import com.example.BEDACS3.Service.model.products.ProductHomeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +24,8 @@ public class productHomeSeviceImpl implements ProductHomeService {
     private OrderDetailRepository orderDetailRepository;
     @Autowired
     private categoryRepository categoryRepository;
+    @Autowired
+    private ReviewRepository reviewRepository;
 
 
     @Override
@@ -54,6 +54,9 @@ public class productHomeSeviceImpl implements ProductHomeService {
             if(category != null){
                 dto.setCategorieId(category.getId());
             }
+
+            ReviewSummary reviewSummary = reviewRepository.getReviewSummaryByProductId(productID);
+            dto.setAverageRating(reviewSummary.getAverageRating());
 
             Integer total_proQuantity = orderDetailRepository.getTotalQuantityByProductId(productID);
             if(total_proQuantity !=null || total_proQuantity !=0){
