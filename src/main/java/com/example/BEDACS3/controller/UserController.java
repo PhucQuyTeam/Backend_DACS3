@@ -2,6 +2,7 @@ package com.example.BEDACS3.controller;
 
 import com.example.BEDACS3.Repository.entity.UserEntity;
 import com.example.BEDACS3.Repository.impl.UserRepositoryImpl;
+import com.example.BEDACS3.Service.model.address.AddressRequest;
 import com.example.BEDACS3.Service.model.auth.UpdateProfileRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +34,7 @@ public class UserController {
 
         // 2. Tìm user trong Database
         UserEntity user = userRepository.findByEmail(email);
+        Map<String, Integer> orderCounts = userRepository.getOrderCounts(user.getId());
 
         // 3. Đóng gói dữ liệu trả về cho Android
         Map<String, Object> profileData = new HashMap<>();
@@ -42,10 +44,9 @@ public class UserController {
         profileData.put("avatar", user.getAvatar());
         profileData.put("numberPhone", user.getNumberPhone());
 
-        // Bạn có thể query thêm số đơn hàng vào đây:
-        profileData.put("pendingCount", 2);
-        profileData.put("shippingCount", 5);
-        profileData.put("completedCount", 12);
+        profileData.put("pendingCount", orderCounts.get("pendingCount"));
+        profileData.put("shippingCount", orderCounts.get("shippingCount"));
+        profileData.put("completedCount", orderCounts.get("completedCount"));
 
         return ResponseEntity.ok(profileData);
     }
@@ -93,4 +94,76 @@ public class UserController {
             return ResponseEntity.status(500).body(response);
         }
     }
+    @GetMapping("/address/my-addresses")
+    public ResponseEntity<?> getMyAddresses() {
+        // 1. Lấy email từ Token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        // 2. Từ email tìm ra thông tin User để lấy ID
+        UserEntity currentUser = userRepository.findByEmail(email);
+        int userId = currentUser.getId();
+
+        // 3. Truyền ID vào hàm để lấy danh sách địa chỉ
+        return ResponseEntity.ok(userRepository.getMyAddresses(userId));
+    }
+    // [POST] Thêm địa chỉ mới
+    @PostMapping("/address/add")
+    public ResponseEntity<?> addAddress(@RequestBody AddressRequest req) {
+        // Lấy thông tin user từ Token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        UserEntity currentUser = userRepository.findByEmail(email);
+        int userId = currentUser.getId();
+
+        boolean success = userRepository.insertAddress(userId, req.provinceId, req.wardId, req.streetDetail);
+
+        Map<String, Object> res = new HashMap<>();
+        res.put("success", success);
+        res.put("message", success ? "Thêm địa chỉ thành công" : "Lỗi khi thêm địa chỉ");
+        return success ? ResponseEntity.ok(res) : ResponseEntity.badRequest().body(res);
+    }
+
+    // [PUT] Cập nhật địa chỉ
+    @PutMapping("/address/update")
+    public ResponseEntity<?> updateAddress(@RequestBody AddressRequest req) {
+        // Lấy thông tin user từ Token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        UserEntity currentUser = userRepository.findByEmail(email);
+        int userId = currentUser.getId();
+
+        boolean success = userRepository.updateAddress(req.id, userId, req.provinceId, req.wardId, req.streetDetail);
+
+        Map<String, Object> res = new HashMap<>();
+        res.put("success", success);
+        res.put("message", success ? "Cập nhật thành công" : "Địa chỉ không tồn tại hoặc không thuộc quyền sở hữu của bạn");
+        return success ? ResponseEntity.ok(res) : ResponseEntity.badRequest().body(res);
+    }
+
+    // [DELETE] Xóa địa chỉ
+    @DeleteMapping("/address/delete/{id}")
+    public ResponseEntity<?> deleteAddress(@PathVariable int id) {
+        // Lấy thông tin user từ Token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        UserEntity currentUser = userRepository.findByEmail(email);
+        int userId = currentUser.getId();
+
+        boolean success = userRepository.deleteAddress(id, userId);
+
+        return success ? ResponseEntity.ok("Đã xóa địa chỉ") : ResponseEntity.badRequest().body("Không thể xóa địa chỉ này");
+    }
+    // [GET] API lấy danh sách Tỉnh/Thành
+    @GetMapping("/address/provinces")
+    public ResponseEntity<?> getAllProvinces() {
+        return ResponseEntity.ok(userRepository.getAllProvinces());
+    }
+
+    // [GET] API lấy danh sách Phường/Xã dựa theo Tỉnh
+    @GetMapping("/address/wards")
+    public ResponseEntity<?> getWardsByProvince(@RequestParam("provinceId") int provinceId) {
+        return ResponseEntity.ok(userRepository.getWardsByProvinceId(provinceId));
+    }
 }
+
