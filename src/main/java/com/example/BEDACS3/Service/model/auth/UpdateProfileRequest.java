@@ -10,5 +10,5 @@ public class UpdateProfileRequest {
 
     public String getNumberPhone() { return numberPhone; }
     public void setNumberPhone(String numberPhone) { this.numberPhone = numberPhone; }
-    ...
+
 }
