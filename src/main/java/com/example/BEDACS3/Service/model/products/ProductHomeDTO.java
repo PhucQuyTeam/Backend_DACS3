@@ -8,11 +8,12 @@ public class ProductHomeDTO {
     private String description;
     private int price;
     private int quantity;
+    private int categorieId;
 
     public ProductHomeDTO() {
     }
 
-    public ProductHomeDTO(int productId, String name, String img, int total_ProductQuantity, String description, int price, int quantity) {
+    public ProductHomeDTO(int productId, String name, String img, int total_ProductQuantity, String description, int price, int quantity, int categorieId) {
         this.productId = productId;
         this.name = name;
         this.img = img;
@@ -20,6 +21,7 @@ public class ProductHomeDTO {
         this.description = description;
         this.price = price;
         this.quantity = quantity;
+        this.categorieId = categorieId;
     }
 
     public int getProductId() {
@@ -76,5 +78,13 @@ public class ProductHomeDTO {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
+    }
+
+    public int getCategorieId() {
+        return categorieId;
+    }
+
+    public void setCategorieId(int categorieId) {
+        this.categorieId = categorieId;
     }
 }

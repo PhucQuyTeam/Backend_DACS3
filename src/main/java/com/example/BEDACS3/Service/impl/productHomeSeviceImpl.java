@@ -1,6 +1,8 @@
 package com.example.BEDACS3.Service.impl;
 
 import com.example.BEDACS3.Repository.OrderDetailRepository;
+import com.example.BEDACS3.Repository.categoryRepository;
+import com.example.BEDACS3.Repository.entity.CategoryEntity;
 import com.example.BEDACS3.Repository.entity.ProductImageEntity;
 import com.example.BEDACS3.Repository.entity.productEntity;
 import com.example.BEDACS3.Repository.productImageRepository;
@@ -22,6 +24,8 @@ public class productHomeSeviceImpl implements ProductHomeService {
     private productImageRepository productImageRepository;
     @Autowired
     private OrderDetailRepository orderDetailRepository;
+    @Autowired
+    private categoryRepository categoryRepository;
 
 
     @Override
@@ -44,6 +48,11 @@ public class productHomeSeviceImpl implements ProductHomeService {
             ProductImageEntity productImageEntity = productImageRepository.findFirstImageByProductId(productID);
             if (productImageEntity != null && productImageEntity.getImagePath() != null) {
                 dto.setImg(productImageEntity.getImagePath());
+            }
+
+            CategoryEntity category = categoryRepository.getCategoryById(productID);
+            if(category != null){
+                dto.setCategorieId(category.getId());
             }
 
             Integer total_proQuantity = orderDetailRepository.getTotalQuantityByProductId(productID);

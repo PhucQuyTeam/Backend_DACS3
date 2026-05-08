@@ -13,7 +13,7 @@ import java.sql.ResultSet;
 public class categoryRepositoryImpl implements categoryRepository {
     @Override
     public CategoryEntity getCategoryById(Integer productId) {
-        CategoryEntity categoryEntity = new CategoryEntity();
+        CategoryEntity categoryEntity = null;
 
         String sql = "SELECT c.id,c.name FROM categories c "+
                      "INNER JOIN products p ON c.id = p.categoryId "+
@@ -24,6 +24,7 @@ public class categoryRepositoryImpl implements categoryRepository {
 
             try(ResultSet rs = ps.executeQuery()){
                 if(rs.next()){
+                    categoryEntity = new CategoryEntity();
                     categoryEntity.setId(rs.getInt("id"));
                     categoryEntity.setName(rs.getString("name"));
                 }
