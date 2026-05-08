@@ -8,7 +8,7 @@
         private String username;
         private String email;
         private String password;
-        private String numberPhone; // Lưu ý: Tên biến khớp với cột trong Database
+        private String numberPhone;
         private int roleid;
         private String avatar;
         private Timestamp createAt;
