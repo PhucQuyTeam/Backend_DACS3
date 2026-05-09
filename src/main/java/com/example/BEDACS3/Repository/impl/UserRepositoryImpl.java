@@ -311,4 +311,20 @@
                 return false;
             }
         }
+        public boolean updatePassword(String email, String newPasswordHashed) {
+            String sql = "UPDATE users SET password = ? WHERE email = ?";
+            try (Connection conn = DatabaseDA.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+
+                ps.setString(1, newPasswordHashed);
+                ps.setString(2, email);
+
+                int rowsAffected = ps.executeUpdate();
+                return rowsAffected > 0; // Trả về true nếu update thành công
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
     }

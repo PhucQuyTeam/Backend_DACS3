@@ -28,4 +28,5 @@ public class AuthController {
     public AuthResponse refreshToken(@RequestBody RefreshTokenRequest request) {
         return authService.refreshToken(request);
     }
+
 }
