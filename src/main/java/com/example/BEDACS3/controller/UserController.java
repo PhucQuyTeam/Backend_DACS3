@@ -3,11 +3,13 @@ package com.example.BEDACS3.controller;
 import com.example.BEDACS3.Repository.entity.UserEntity;
 import com.example.BEDACS3.Repository.impl.UserRepositoryImpl;
 import com.example.BEDACS3.Service.model.address.AddressRequest;
+import com.example.BEDACS3.Service.model.auth.ChangePasswordRequest;
 import com.example.BEDACS3.Service.model.auth.UpdateProfileRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,6 +27,9 @@ public class UserController {
 
     @Autowired
     private UserRepositoryImpl userRepository;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     @GetMapping("/profile")
     public ResponseEntity<?> getUserProfile() {
@@ -164,6 +169,38 @@ public class UserController {
     @GetMapping("/address/wards")
     public ResponseEntity<?> getWardsByProvince(@RequestParam("provinceId") int provinceId) {
         return ResponseEntity.ok(userRepository.getWardsByProvinceId(provinceId));
+    }
+
+    @PutMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String email = authentication.getName();
+
+            // 1. Dùng UserEntity thay vì User cho đồng bộ với các hàm trên
+            UserEntity currentUser = userRepository.findByEmail(email);
+            if (currentUser == null) {
+                return ResponseEntity.badRequest().body("Không tìm thấy người dùng!");
+            }
+
+            // 2. Lấy password từ currentUser
+            if (!passwordEncoder.matches(request.getOldPassword(), currentUser.getPassword())) {
+                return ResponseEntity.badRequest().body("Mật khẩu cũ không chính xác!");
+            }
+
+            // 3. Mã hóa và cập nhật
+            String hashedNewPassword = passwordEncoder.encode(request.getNewPassword());
+            boolean isUpdated = userRepository.updatePassword(email, hashedNewPassword);
+
+            if (isUpdated) {
+                return ResponseEntity.ok("Đổi mật khẩu thành công!");
+            } else {
+                return ResponseEntity.badRequest().body("Lỗi khi lưu mật khẩu mới!");
+            }
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi Server: " + e.getMessage());
+        }
     }
 }
 

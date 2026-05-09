@@ -6,6 +6,7 @@ public class OrderDTO {
     private int status;
     private String orderDate;
     private String addressDetail;
+    private String paymentStatus;
 
     public int getId() {
         return id;
@@ -45,5 +46,13 @@ public class OrderDTO {
 
     public void setAddressDetail(String addressDetail) {
         this.addressDetail = addressDetail;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
     }
 }

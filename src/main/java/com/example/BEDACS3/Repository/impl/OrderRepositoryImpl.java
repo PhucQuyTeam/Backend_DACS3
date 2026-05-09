@@ -19,8 +19,7 @@ public class OrderRepositoryImpl implements OrderRepository {
         List<OrderDTO> list = new ArrayList<>();
         String deliveryStatusStr = (tabStatus == 0) ? "pending" : (tabStatus == 1 ? "shipping" : "delivered");
 
-        // SQL mới: Chỉ lấy thông tin đơn hàng và địa chỉ (Không gọi orderdetails và product_images nữa)
-        String sql = "SELECT o.id, o.total, o.created_at, " +
+        String sql = "SELECT o.id, o.total, o.created_at, o.status, " +
                 "       CONCAT(ad.streetDetail, ', ', w.name, ', ', p.name) as fullAddress " +
                 "FROM orders o " +
                 "JOIN users u ON o.userId = u.id " +
@@ -28,7 +27,7 @@ public class OrderRepositoryImpl implements OrderRepository {
                 "LEFT JOIN provinces p ON ad.proviceId = p.id " +
                 "LEFT JOIN wards w ON ad.wardId = w.id " +
                 "WHERE u.email = ? AND o.deliveryStatus = ? " +
-                "ORDER BY o.created_at DESC"; // Sắp xếp đơn mới nhất lên đầu
+                "ORDER BY o.created_at DESC";
 
         try (Connection conn = DatabaseDA.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -44,6 +43,8 @@ public class OrderRepositoryImpl implements OrderRepository {
                 order.setStatus(tabStatus);
                 order.setOrderDate(rs.getTimestamp("created_at").toString());
                 order.setAddressDetail(rs.getString("fullAddress"));
+
+                order.setPaymentStatus(rs.getString("status"));
 
                 list.add(order);
             }
@@ -86,6 +87,8 @@ public class OrderRepositoryImpl implements OrderRepository {
         try {
             conn = DatabaseDA.getConnection();
             conn.setAutoCommit(false); // BẬT CHẾ ĐỘ TRANSACTION
+            String orderStatus = "ZaloPay".equalsIgnoreCase(paymentMethod) ? "paid" : "pending";
+
 
             // 1. Lưu vào bảng orders
             String sqlOrder = "INSERT INTO orders (userId, addressid, total, status, deliveryStatus, created_at) VALUES (?, ?, ?, ?, ?, NOW())";
@@ -93,7 +96,7 @@ public class OrderRepositoryImpl implements OrderRepository {
             psOrder.setInt(1, userId);
             psOrder.setInt(2, addressId);
             psOrder.setDouble(3, totalAmount);
-            psOrder.setString(4, "pending"); // Chưa thanh toán
+            psOrder.setString(4, orderStatus); // Chưa thanh toán
             psOrder.setString(5, "pending"); // Đang chờ xác nhận giao hàng
             psOrder.executeUpdate();
 
