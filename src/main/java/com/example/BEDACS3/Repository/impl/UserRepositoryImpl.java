@@ -311,4 +311,24 @@
                 return false;
             }
         }
+
+        @Override
+        public UserEntity findById(int id) {
+            String sql = "SELECT * FROM users WHERE id = ?";
+            try (Connection conn = DatabaseDA.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, id);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    UserEntity user = new UserEntity();
+                    user.setId(rs.getInt("id"));
+                    user.setName(rs.getString("name"));
+                    user.setAvatar(rs.getString("avatar"));
+                    return user;
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
     }
