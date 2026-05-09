@@ -8,4 +8,5 @@ public interface UserRepository {
     UserEntity save(UserEntity userEntity);
     UserEntity getNameReviewById(Integer userId);
     boolean updateCartQuantity(int cartId, int quantity);
+    UserEntity findById(int id);
 }

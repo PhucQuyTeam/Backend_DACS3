@@ -16,7 +16,6 @@
 
     @Repository
     public class UserRepositoryImpl implements UserRepository {
-
         @Override
         public UserEntity findByEmail(String email) {
             String sql = "SELECT * FROM users WHERE email = ?";
@@ -297,6 +296,7 @@
             }
             return counts;
         }
+
         public boolean updateCartQuantity(int cartId, int quantity) {
             String sql = "UPDATE cart SET quantity = ?, updated_at = NOW() WHERE id = ?";
             try (Connection conn = DatabaseDA.getConnection();
@@ -311,6 +311,7 @@
                 return false;
             }
         }
+
         public boolean updatePassword(String email, String newPasswordHashed) {
             String sql = "UPDATE users SET password = ? WHERE email = ?";
             try (Connection conn = DatabaseDA.getConnection();
@@ -327,4 +328,25 @@
                 return false;
             }
         }
+
+        @Override
+        public UserEntity findById(int id) {
+            String sql = "SELECT * FROM users WHERE id = ?";
+            try (Connection conn = DatabaseDA.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, id);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    UserEntity user = new UserEntity();
+                    user.setId(rs.getInt("id"));
+                    user.setName(rs.getString("name"));
+                    user.setAvatar(rs.getString("avatar"));
+                    return user;
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
     }
