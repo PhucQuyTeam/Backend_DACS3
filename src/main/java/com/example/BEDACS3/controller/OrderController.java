@@ -1,7 +1,9 @@
 package com.example.BEDACS3.controller;
 
 import com.example.BEDACS3.Repository.OrderRepository;
+import com.example.BEDACS3.Repository.impl.NotificationRepositoryImpl; // THÊM IMPORT NÀY
 import com.example.BEDACS3.Repository.impl.UserRepositoryImpl;
+import com.example.BEDACS3.Repository.impl.reviewRepositoryImpl;
 import com.example.BEDACS3.Service.model.order.OrderDTO;
 import com.example.BEDACS3.Service.model.order.OrderItemDTO;
 import com.example.BEDACS3.Service.model.order.OrderRequest;
@@ -27,6 +29,12 @@ public class OrderController {
     @Autowired
     private UserRepositoryImpl userRepository;
 
+    // GỌI THẰNG ĐỆ CHUYÊN GHI THÔNG BÁO VÀO ĐÂY
+    @Autowired
+    private NotificationRepositoryImpl notificationRepository;
+    @Autowired
+    private reviewRepositoryImpl reviewRepo;
+
     @GetMapping("/my-orders")
     public ResponseEntity<?> getMyOrders(@RequestParam("status") int status) {
         try {
@@ -38,18 +46,31 @@ public class OrderController {
             return ResponseEntity.badRequest().body("Lỗi lấy dữ liệu đơn hàng: " + e.getMessage());
         }
     }
-
     @GetMapping("/order-items")
     public ResponseEntity<?> getOrderItems(@RequestParam("orderId") int orderId) {
         try {
+            // Lấy ID người dùng hiện tại
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String email = authentication.getName();
+            int userId = userRepository.findByEmail(email).getId();
+
             List<OrderItemDTO> items = orderRepository.findOrderItemsByOrderId(orderId);
+
+            // QUÉT QUA TỪNG MÓN: Xem khách đã đánh giá chưa?
+            for (OrderItemDTO item : items) {
+                boolean reviewed = reviewRepo.hasReviewed(userId, item.getProductId(), orderId);
+                item.setReviewed(reviewed);
+            }
+
             return ResponseEntity.ok(items);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Lỗi lấy chi tiết sản phẩm: " + e.getMessage());
         }
     }
 
-    // 1. THANH TOÁN TIỀN MẶT (COD) - Lưu thẳng vào DB
+    // =========================================================
+    // 1. THANH TOÁN TIỀN MẶT (COD)
+    // =========================================================
     @PostMapping("/create")
     public ResponseEntity<?> createOrder(@RequestBody OrderRequest request) {
         try {
@@ -66,6 +87,11 @@ public class OrderController {
             );
 
             if (success) {
+                // ĐƠN HÀNG LƯU THÀNH CÔNG -> GHI THÔNG BÁO VÀO CSDL
+                String title = "Đặt hàng thành công \uD83C\uDF89"; // \uD83C\uDF89 là icon cái pháo hoa
+                String message = "Đơn hàng COD trị giá " + String.format("%,.0f", request.getTotalAmount()) + "đ đã được ghi nhận. Chúng tôi sẽ sớm giao cá cho bạn!";
+                notificationRepository.insertNotification(userId, title, message);
+
                 return ResponseEntity.ok("Đặt hàng thành công!");
             } else {
                 return ResponseEntity.badRequest().body("Lỗi hệ thống khi đặt hàng");
@@ -75,7 +101,9 @@ public class OrderController {
         }
     }
 
-    // 2. TẠO LINK ZALOPAY (Chưa có tiền nên không lưu Database)
+    // =========================================================
+    // 2. TẠO LINK ZALOPAY
+    // =========================================================
     @PostMapping("/create-zalopay")
     public ResponseEntity<?> createZaloPayOrder(@RequestBody OrderRequest request) {
         try {
@@ -118,21 +146,21 @@ public class OrderController {
             org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
             ResponseEntity<String> response = restTemplate.postForEntity(com.example.BEDACS3.Config.ZaloPayConfig.CREATE_ORDER_URL, entity, String.class);
 
-            // --- BẮT ĐẦU SỬA Ở ĐÂY ---
-            // Lấy kết quả ZaloPay trả về, nhét thêm cái app_trans_id vào rồi mới gửi cho Android
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> responseMap = mapper.readValue(response.getBody(), Map.class);
             responseMap.put("app_trans_id", app_trans_id);
 
             return ResponseEntity.ok(responseMap);
-            // --- KẾT THÚC SỬA ---
 
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().body("Lỗi ZaloPay: " + e.getMessage());
         }
-        }
-    // 3. KIỂM TRA ZALOPAY TỪ APP QUAY VỀ - Trả tiền rồi mới lưu Database
+    }
+
+    // =========================================================
+    // 3. KIỂM TRA ZALOPAY - LƯU ĐƠN & GHI THÔNG BÁO
+    // =========================================================
     @PostMapping("/check-zalopay")
     public ResponseEntity<?> checkZaloPayStatus(
             @RequestParam("app_trans_id") String appTransId,
@@ -161,12 +189,18 @@ public class OrderController {
                 String email = authentication.getName();
                 int userId = userRepository.findByEmail(email).getId();
 
-                // NẾU CÓ TIỀN -> LƯU ĐƠN VÀO MYSQL VÀ XÓA GIỎ HÀNG Ở ĐÂY
-                orderRepository.placeOrder(userId, request.getAddressId(), request.getTotalAmount(), "ZaloPay", request.getItems());
+                // LƯU ĐƠN VÀO MYSQL
+                boolean success = orderRepository.placeOrder(userId, request.getAddressId(), request.getTotalAmount(), "ZaloPay", request.getItems());
+
+                // NẾU LƯU ĐƠN THÀNH CÔNG -> GHI THÔNG BÁO VÀO CSDL
+                if (success) {
+                    String title = "Thanh toán ZaloPay thành công \uD83D\uDCB8"; // Icon tiền
+                    String message = "Đơn hàng trị giá " + String.format("%,.0f", request.getTotalAmount()) + "đ đã được thanh toán. MQ Aquatic sẽ đóng gói ngay lập tức!";
+                    notificationRepository.insertNotification(userId, title, message);
+                }
 
                 return ResponseEntity.ok("Thanh toán thành công!");
             } else {
-
                 String returnMsg = jsonResult.has("return_message") ? jsonResult.get("return_message").asText() : "Lỗi không xác định";
                 return ResponseEntity.badRequest().body("ZaloPay: " + returnMsg);
             }
