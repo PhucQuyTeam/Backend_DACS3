@@ -76,4 +76,38 @@ public class reviewRepositoryImpl implements ReviewRepository {
 
         return listReviews;
     }
+    public boolean hasReviewed(int userId, int productId, int orderId) {
+        String sql = "SELECT COUNT(*) FROM reviews WHERE user_id = ? AND product_id = ? AND orderid = ?";
+        try (Connection conn = DatabaseDA.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, productId);
+            ps.setInt(3, orderId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0; // Trả về true nếu đã từng đánh giá
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    public boolean insertReview(int userId, int productId, int orderId, int rating, String comment, String imageFileName) {
+        // Tên cột phải khớp chính xác với hình sếp gửi: user_id, product_id, orderid
+        String sql = "INSERT INTO reviews (user_id, product_id, orderid, rating, comment, image, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())";
+        try (Connection conn = DatabaseDA.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, productId);
+            ps.setInt(3, orderId);
+            ps.setInt(4, rating);
+            ps.setString(5, comment);
+            ps.setString(6, imageFileName);
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

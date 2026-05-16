@@ -53,12 +53,13 @@ public class OrderRepositoryImpl implements OrderRepository {
         }
         return list;
     }
+
     @Override
     public List<OrderItemDTO> findOrderItemsByOrderId(int orderId) {
         List<OrderItemDTO> list = new ArrayList<>();
 
-        // SQL lấy: Tên cá, Giá, Số lượng VÀ 1 ảnh đại diện của con cá đó
-        String sql = "SELECT od.productName, od.price, od.productQuantity, " +
+        // ĐÃ SỬA: Thêm "od.productId, " (có dấu phẩy) vào đầu câu SELECT
+        String sql = "SELECT od.productId, od.productName, od.price, od.productQuantity, " +
                 "       (SELECT image_path FROM product_images WHERE product_id = od.productId LIMIT 1) as image_path " +
                 "FROM orderdetails od " +
                 "WHERE od.orderId = ?";
@@ -71,6 +72,7 @@ public class OrderRepositoryImpl implements OrderRepository {
 
             while (rs.next()) {
                 OrderItemDTO item = new OrderItemDTO();
+                item.setProductId(rs.getInt("productId")); // Lấy đúng productId
                 item.setProductName(rs.getString("productName"));
                 item.setPrice(rs.getDouble("price"));
                 item.setQuantity(rs.getInt("productQuantity"));
