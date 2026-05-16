@@ -4,7 +4,6 @@ package com.example.BEDACS3.Repository.entity;
 import java.sql.Timestamp;
 
 public class productEntity {
-
         private int id;
         private String name;
         private String description;
