@@ -1,6 +1,7 @@
 package com.example.BEDACS3.Repository.impl;
 
 import com.example.BEDACS3.Database.DatabaseDA;
+import com.example.BEDACS3.Repository.entity.productAiEntity;
 import com.example.BEDACS3.Repository.entity.productEntity;
 import com.example.BEDACS3.Repository.productRepository;
 import org.springframework.stereotype.Repository;
@@ -111,5 +112,43 @@ public class productRepositoryImpl implements productRepository {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public List<productAiEntity> getAllProducts() {
+        List<productAiEntity> proList = new ArrayList<>();
+
+        // Câu lệnh LEFT JOIN lấy tất cả sản phẩm + tên danh mục của nó
+        String sql = "SELECT p.*, c.name as category_name " +
+                "FROM products p " +
+                "LEFT JOIN categories c ON p.categoryId = c.id";
+
+        try(Connection conn = DatabaseDA.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs  = ps.executeQuery()) {
+
+            while (rs.next()){
+                productAiEntity product = new productAiEntity();
+                product.setId(rs.getInt("id"));
+                product.setName(rs.getString("name"));
+                product.setDescription(rs.getString("description"));
+                product.setPrice(rs.getInt("price"));
+                product.setQuantity(rs.getInt("quantity"));
+
+                int categoryId = rs.getInt("categoryId");
+                product.setCategoryId(rs.wasNull() ? null : categoryId);
+
+                product.setCreatedAt(rs.getTimestamp("created_at"));
+                product.setUpdatedAt(rs.getTimestamp("updated_at"));
+
+                // Hứng tên danh mục từ câu JOIN đưa vào Entity
+                product.setCategoryName(rs.getString("category_name"));
+
+                proList.add(product);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return proList;
     }
 }
