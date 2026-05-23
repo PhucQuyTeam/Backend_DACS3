@@ -74,7 +74,7 @@ public class UserController {
                 // Tạo tên file mới để không bị trùng (Thêm timestamp)
                 fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
                 // Đường dẫn lưu file vào thư mục upload/ ở ngoài root
-                Path path = Paths.get("upload/" + fileName);
+                Path path = Paths.get("C:/xampp/htdocs/uploads/" + fileName);
                 // Copy file từ request vào thư mục
                 Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
             }
