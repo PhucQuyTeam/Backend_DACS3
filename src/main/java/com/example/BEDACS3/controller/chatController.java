@@ -113,7 +113,7 @@ public class chatController {
             String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
             // 2. Trỏ tới thư mục "upload" ở thư mục gốc của project (Khớp với PhotoConfig)
-            Path uploadPath = Paths.get("upload");
+            Path uploadPath = Paths.get("C:/xampp/htdocs/uploads");
 
             // 3. Nếu thư mục upload chưa tồn tại thì tự động tạo mới
             if (!Files.exists(uploadPath)) {
