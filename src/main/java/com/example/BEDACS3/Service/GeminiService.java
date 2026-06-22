@@ -21,9 +21,9 @@ public class GeminiService {
     private productRepository repository;
 
     // ĐIỀN API KEY CỦA BẠN VÀO ĐÂY
-    private final String GEMINI_API_KEY = "AIzaSyCIbnt4MsEZcqLxfXCsWU8x0wBxNH2KP_g";
+    private final String GEMINI_API_KEY = "";
     // Cập nhật lên model gemini-2.5-flash mới nhất của Google
-    private final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + GEMINI_API_KEY;
+    private final String GEMINI_API_URL = "" + GEMINI_API_KEY;
 
     public String askAI(String userMessage) {
         List<productAiEntity> listProducts = repository.getAllProducts();
